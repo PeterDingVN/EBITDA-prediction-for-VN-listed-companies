@@ -1,7 +1,7 @@
 # EBITDA-prediction-for-VN-listed-companies
 
 ## Project's goal
-Build a forecasting model that forecasts EBITDA of 2691 listed companies in Vietnam, based on 19 features, the detail of which is given in ...###########
+Build a forecasting model that forecasts EBITDA of 2691 listed companies in Vietnam, based on 19 features, the detail of which is given in this file: all_variables.txt
 
 ## Execution
 ### Data collection
@@ -25,7 +25,31 @@ Further EDA reveals Multi-collinearity and Hetereokedasticity within the data as
 Particularly, to test for multi-collinearuty, I used VIF, showing multicollineairty among many features, including fixed_asset, long_liability, short_liability, and equity fund as the features with most serious issues. However, since my model focused more on forecasting than intepreting features, this might not be a concerning problem. 
 To test for hetereokedasticity, Breusch_Pagan test was conducted. The p-value returned was 0.0, much lower than 0.05 threshold, indicating hetereokedasticity issue. This issue with different variance could pose a challenge to regression, mostly linear models. Therefore, I intetionally avoid linear models (OLS for example).
 
-### Main model
+### Choosing algorithms
+- For the scope of this project, I'll limit my choice to most popular models and algorithms for forecasting problem:
+
+    - Support Vector Regression (SVR):
+        + Nonparametric: The algorithm does not assume the distribution of data. (Arnout Van Messem, 2019, https://doi.org/10.1016/bs.host.2019.08.003)
+        + Robust to outliers: at its core, SVR works only with "hardest-to-be-classified" data points, not caring about the whole dataset. Since, I did not treat outliers in EDA, this characteristic of SVR proves useful. (A.V.Messem, 2019)
+        + More, the algorithm can implicitly transform the data into linear problem (add dimensions) to self-improve without explicit programming. (A.V.Messem, 2019)
+
+    - XGBoost:
+        + Nonparametric
+        + Support regularization, significantly reduce the need for feature engineering (though it cannot account for cases for adding features with more explanation power, it can account for cases where features are redundant) -> beneficial when domain knowledge is limited
+        + Have been used in many panel data science researches (Shenlong Huang and Lingyun Hu, 2024; Reza Sotudeh et al., 2025; Jonathan Fuhr and Dominik Papies, 2024)
+
+    - Random Forest:
+        + Nonparametric
+        + Random forest train data on multiple subsets of data, each using distinct subset of features, reducing overfitting as a result
+        + However, normal RF model often assume independence among observations, violating panel data's structure. (Jianchang Hu and Silke Szymczak, 2023, https://doi.org/10.1093/bib/bbad002)
+
+### Run process
+- Cross-validation:
+    + I used PanelSplit from 4Freye (here's his git link: https://github.com/4Freye/panelsplit) on 3 algorithms SVR, XGBoost and RFRegressor
+    + However, the result is not favorable, because while R-squared, in general, is high (around 80 - 85%), RMSE and MAPE told a different stories. MAPE revolved around 5x10^24 while 
+RMSE revolved around 1.10^12. Put this into scale, the maximum value of EBITDA is about 1x10^14, and the min is around -1x10^13. This meant huge error in forecasting.
+
+### Solution
 
 
 ## Limitation
