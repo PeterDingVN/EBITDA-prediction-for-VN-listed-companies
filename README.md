@@ -50,8 +50,15 @@ To test for hetereokedasticity, Breusch_Pagan test was conducted. The p-value re
 RMSE revolved around 1.10^12. Put this into scale, the maximum value of EBITDA is about 1x10^14, and the min is around -1x10^13. This meant huge error in forecasting.
 
 ### Solution
+- Outlier drop: dropping all outliers outside IQR. This gives the best result in terms of MAPE and RMSE despite at a small expense of lower r2 (84% -> 77%)
+- Scaling: log_transform also improved the data (in order to deal with negative and zero value, the following formula was applied: sign(+ or -)*log(|y|+1)), but yeo-johnson transformation did not
+- Add lag: lag for both target var and features that highly correlate with target_var (lag from 1 -> 3); this method also proved effective in improving RMSE, MAPE, though not R2
+- Balanced data: balance out the data by dropping all companies that did not report for completely 10 years
 
+### My choice
+After, using cross-validation, plus engineering the features based on the four solutions above (I combined lag, scaling and balanced data), I came to final choice:
+- Model: XGBoost (n_estmators = 300, ###
 
 ## Limitation
-
+- Data shortage ###
 
