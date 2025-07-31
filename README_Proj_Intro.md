@@ -1,13 +1,13 @@
 # EBITDA-prediction-for-VN-listed-companies
 
 ## Project's goal
-Build a forecasting model that forecasts EBITDA of 2691 listed companies in Vietnam, based on 19 features, the detail of which is given in this file: all_variables.txt
+Build a forecasting model that forecasts EBITDA of over 2000 listed companies in Vietnam, based on 19 features, the detail of which is given in this file: all_variables.txt
 
 ## Execution
 ### Data collection
 - The input data was taken from FinProX on 2911 companies across 10 years from 2015 to 2024.
 - Then, since many values are missing not at random (either because the companies are yet to be listed or they closed down before 2024), they are dropped.
-- This led to an unbalanced dataset with poorer forecasting power (since many companies have null values in all 10 years, hence being dropped completely).
+- This led to an unbalanced dataset with poorer forecasting power, however (since many companies have null values in all 10 years, hence being dropped completely). But this result is accpetable because the number of companies, after dropping, is still high (>2000) and most dropped companies are private or otc (over the counter).
 
 ### EDA
 
@@ -51,14 +51,31 @@ RMSE revolved around 1.10^12. Put this into scale, the maximum value of EBITDA i
 
 ### Solution
 - Outlier drop: dropping all outliers outside IQR. This gives the best result in terms of MAPE and RMSE despite at a small expense of lower r2 (84% -> 77%)
-- Scaling: log_transform also improved the data (in order to deal with negative and zero value, the following formula was applied: sign(+ or -)*log(|y|+1)), but yeo-johnson transformation did not
+- Scaling: log_transform also improved the data (in order to deal with negative and zero value, the following formula was applied: ```sign(+ or -)*log(|y|+1))```, but yeo-johnson transformation did not
 - Add lag: lag for both target var and features that highly correlate with target_var (lag from 1 -> 3); this method also proved effective in improving RMSE, MAPE, though not R2
 - Balanced data: balance out the data by dropping all companies that did not report for completely 10 years
 
 ### My choice
 After, using cross-validation, plus engineering the features based on the four solutions above (I combined lag, scaling and balanced data), I came to final choice:
-- Model: XGBoost (n_estmators = 300, ###
+- Model: XGBoost (n_estmators = 300, learning_rate= 0.05, max_depth=6, subsample=0.5)
+- After further testing, the hyper-param above causes overfitting, so new hyper-param was chosen as follwed: n_estimator = 100, max_depth = 3, same learn rate and subsample, to reduce overfitting issue.
+- Result:
+    + Train set:
+      - RMSE: 9,663,491,627.04
+      - MAPE: 0.18
+      - R2: 0.87
 
-## Limitation
-- Data shortage ###
+    + Val set:
+      - RMSE: 14,585,114,168.59
+      - MAPE: 0.24
+      - R2: 0.70
+ 
+    + Test set:
+      - RMSE: 12,458,954,615.85
+      - MAPE: 0.20
+      - R2: 0.77
+
+## Limitation of the model
+- Data input shortage: since the model returned best result when outliers are dropped based on IQR method, much outlier has been dropped in exchange for better prediction. However, this made the model less powerful in times of outlying or unexpected events that make ebitda abnormally high or low.
+- MECE of algorithm: the model only used most commonly applied algorithm instead of trying all available algorithms, risking missing some good algorithms.
 
